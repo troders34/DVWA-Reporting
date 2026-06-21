@@ -63,15 +63,34 @@ Dari intercepted request yang terdapat di Burp Suite pada percobaan pertama, hal
 >   "/DVWA/vulnerabilities/brute/:username=^USER^&password=^PASS^&Login=Login:H=Cookie: PHPSESSID=857da***dfe44; security=low:F=Username and/or password incorrect."
 
 **Penjelasan:**
-5 baris bash command yang digunakan dengan tool Hydra dimaksudkan untuk mengotomatisasi serangan terhadap login page secara bertubi-tubi sebanyak ditemukkannya pasangan kredensial (username & password) yang sesuai. Parameter yang perlu diperhatikan pada command ini antara lain: IPv4 address target, path file teks (.txt) yang berisikan daftar password yang akan dicoba, path DVWA brute, dan Session ID.
+5 baris bash command yang digunakan dengan tool Hydra dimaksudkan untuk mengotomatisasi serangan terhadap login page secara bertubi-tubi sebanyak ditemukkannya pasangan kredensial (username & password) yang sesuai. Parameter yang perlu diperhatikan pada command ini antara lain: 'admin' sebagai username, path file teks (.txt) yang berisikan daftar password yang akan diuji, IPv4 address target, path DVWA brute, HTTP GET, dan Session ID. Parameter pendukung antara lain: keterangan jika pengujian gagal berupa "username and/or password incorrect." Perlu diketahui pula jika value username bukan "admin", maka pengujian gagal, dengan keterangan sebagaimana disebutkan sebelumnya.
 
 
 **Tahap 4: Verification**
 
-# Affected Demographic
+> [80][http-get-form] host: 192.168.1.10   login: admin   password: password
+
+Pengujian berhasil diindikasikan dengan pemberitahuan pasangan kredensial (username & password) dengan teks bertinta warna cerah, dalam kasus ini adalah "login: admin" dan "password: password."
 
 # Recommendation
 
-# Timeline
+Mitigasi serangan ini dapat ditempuh dengan beberapa mekanisme berikut:
+
+## A. Code-Level Recommendation (Application / PHP)
+
+1. Implementasi account lockout setelah beberapa percobaan login gagal, misalkan: setelah 5x percobaan.
+2. Menerapkan server-side response delay apapun outcome yang muncul.
+3. Memigrasi credential submission dari HTTP GET ke HTTP POST, menghapus kredensial dari URL, riwayat browser, dan server access logs.
+4. Mengganti string-concatenated SQL queries with parameterized queries, contoh: mysqli prepare() atau bind_param(), as defense-in-depth alongside input escaping, closing related injection surface in the same code path.
+5. Memasang CAPTCHA, reCAPTCHA v3 atau hCAPTCHA, setelah sekian kali percobaan gagal.
+6. Memasang multi-factor authentication (MFA) terhadap akun administrator dan berbagai privileged accounts lainnya. 
+
+**B. Configuration and Infrastructure-Level Recommendation**
+
+1. Deploy rate-limiting rules at reverse proxy or Web App firewall, contoh: ModSecurity dengan OWASP Core Rule Set, atau cloud WAF, yang ditargetkan khusus kepada authentication endpoint dan independent of any application-level fix.
+2. Deploy log-based intrusion detection mechanism, contoh: fail2ban, agar secara otomatis memblokir alamat IPv4 sumber yang terindikasi melakukan pola brute-force pada network layer.
+3. Centralize (memusatkan) authentication event logging and mengintegrasikannya dengan SIEM untuk mendeteksi percobaan login yang aneh dalam periode waktu singkat, daripada bergantung pada preventive control.
+4. Enforce and periodically audit a strong password policy untuk semua akun, with particular emphasis on administrative credentials.
 
 # References
+[CWE-307: Improper Restriction of Excessive Authentication Attempts](https://cwe.mitre.org/data/definitions/307.html)
