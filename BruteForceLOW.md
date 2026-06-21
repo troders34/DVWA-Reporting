@@ -37,7 +37,7 @@ Berikut informasi tools dan kegunaannya pada pengujian ini.
 - curl = low-level manual request verification and diagnostics
 
 Visualisasi tahap 1 dapat dilihat pada gambar berikut:
-![Alt text](https://github.com/troders34/DVWA-Reporting/Images/ fdf)
+![Infrastructure Visualization](https://github.com/troders34/DVWA-Reporting/Images/Networks_and_Tools_Visualization.png)
 
 **Tahap 2: HTTP Request and Cookie Analysis**
 **Tahap 3: Exploitation via Hydra**
